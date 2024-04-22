@@ -22,10 +22,19 @@ strategy:
       python.version: '3.7'
 
 steps:
+- script: |
+    if [ "$(python3.6 --version)" != "Python 3.6.15" ]; then
+      echo "Installing Python 3.6"
+      sudo apt-get update
+      sudo apt-get install -y python3.6
+    fi
+  displayName: 'Install Python 3.6'
+
 - task: UsePythonVersion@0
   inputs:
-    versionSpec: '$(python.version)'
-  displayName: 'Use Python $(python.version)'
+    versionSpec: '3.6'
+    addToPath: true
+  displayName: 'Use Python 3.6'
 
 - script: |
     python -m pip install --upgrade pip
