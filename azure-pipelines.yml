@@ -12,29 +12,23 @@ pool:
 
 strategy:
   matrix:
-    Python27:
-      python.version: '2.7'
-    Python35:
-      python.version: '3.5'
     Python36:
-      python.version: '3.6'
-    Python37:
-      python.version: '3.7'
+      python.version: '3.11.8'
 
 steps:
 - script: |
-    if [ "$(python3.6 --version)" != "Python 3.6.15" ]; then
-      echo "Installing Python 3.6"
+    if [ "$(python --version)" != "Python 3.11.8" ]; then
+      echo "Installing Python 3.11.8"
       sudo apt-get update
-      sudo apt-get install -y python3.6
+      sudo apt-get install -y python3.11.8
     fi
-  displayName: 'Install Python 3.6'
+  displayName: 'Install Python 3.11.8'
 
 - task: UsePythonVersion@0
   inputs:
-    versionSpec: '3.6'
+    versionSpec: '3.11.8'
     addToPath: true
-  displayName: 'Use Python 3.6'
+  displayName: 'Use Python 3.11.8'
 
 - script: |
     python -m pip install --upgrade pip
