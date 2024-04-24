@@ -61,10 +61,6 @@ steps:
     pytest
   displayName: 'Run tests'
 
-- script: |
-    echo "##vso[task.setvariable variable=build.artifactstagingdirectory]$(System.DefaultWorkingDirectory)"
-  displayName: 'Set artifact directory'
-
 - task: ArchiveFiles@2
   inputs:
     rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
