@@ -3,6 +3,8 @@
 # Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
 
+# first try 
+#####################################################################
 # trigger:
 # - main
 
@@ -40,6 +42,45 @@
 #     pytest
 #   displayName: 'pytest'
 
+# Second try
+################################################################################
+# trigger:
+# - main
+
+# pool:
+#   vmImage: 'ubuntu-latest'
+#   name: self-hosted
+
+# steps:
+# - script: |
+#     python3 --version
+#   displayName: 'Show Python version'
+
+# - script: |
+#     python3 -m pip install --upgrade pip
+#     pip install -r requirements.txt
+#   displayName: 'Install dependencies'
+
+# - script: |
+#     pytest
+#   displayName: 'Run tests'
+
+# - task: ArchiveFiles@2
+#   inputs:
+#     rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+#     includeRootFolder: false
+#     archiveType: 'zip'
+#     archiveFile: '$(build.artifactstagingdirectory)/task-api.zip'
+#   displayName: 'Archive files'
+
+# - task: PublishBuildArtifacts@1
+#   inputs:
+#     pathtoPublish: '$(build.artifactstagingdirectory)'
+#     artifactName: 'task-api'
+#     publishLocation: 'Container'
+
+# Third try
+#################################################################################
 trigger:
 - main
 
@@ -47,30 +88,53 @@ pool:
   vmImage: 'ubuntu-latest'
   name: self-hosted
 
-steps:
-- script: |
-    python3 --version
-  displayName: 'Show Python version'
+stages:
+- stage: Build
+  jobs:
+  - job: BuildJob
+    steps:
+    - script: |
+        python3 --version
+      displayName: 'Show Python version'
 
-- script: |
-    python3 -m pip install --upgrade pip
-    pip install -r requirements.txt
-  displayName: 'Install dependencies'
+    - script: |
+        python3 -m pip install --upgrade pip
+        pip install -r requirements.txt
+      displayName: 'Install dependencies'
 
-- script: |
-    pytest
-  displayName: 'Run tests'
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(build.artifactstagingdirectory)/task-api.zip'
+      displayName: 'Archive files'
 
-- task: ArchiveFiles@2
-  inputs:
-    rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
-    includeRootFolder: false
-    archiveType: 'zip'
-    archiveFile: '$(build.artifactstagingdirectory)/task-api.zip'
-  displayName: 'Archive files'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathtoPublish: '$(build.artifactstagingdirectory)'
+        artifactName: 'task-api'
+        publishLocation: 'Container'
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathtoPublish: '$(build.artifactstagingdirectory)'
-    artifactName: 'task-api'
-    publishLocation: 'Container'
+- stage: Test
+  jobs:
+  - job: TestJob
+    steps:
+    - script: |
+        pytest
+      displayName: 'Run tests'
+
+# - stage: Deploy
+#   jobs:
+#   - deployment: DeployJob
+#     dependsOn: Test
+#     environment: '<Your-Environment-Name>'
+#     strategy:
+#       runOnce:
+#         deploy:
+#           steps:
+#           - task: AzureWebApp@1
+#             inputs:
+#               azureSubscription: '<Your-Azure-Subscription>'
+#               appName: '<Your-App-Service-Name>'
+#               package: '$(Pipeline.Workspace)/drop/task-api.zip'
